@@ -59,11 +59,6 @@ if __name__ == '__main__':
 
     setpoints, setpoints_df = create_setpoints_list(calibration_data_file_path=ROx_data_file_path)
 
-    ################################################# 0.01 standard deviation
-
-    # df_stable_ROx_Calibrated_0_1_std, ROx_Calibrated_0_1_std_ranges_df = identify_stable_regions(
-    #     df=sensor_name_dfs["(U10391 - Calibrated)"], setpoints=setpoints, setpoints_df=setpoints_df,
-    #     min_duration=30, tolerance_fraction=0.1)
 
     df_stable_ROx_Calibrated_0_1_std, ROx_Calibrated_0_1_std_ranges_df = identify_stable_regions(
         df=sensor_name_dfs["(U10391 - Calibrated)"],
@@ -166,14 +161,6 @@ if __name__ == '__main__':
         ROx_coeff_file_path, newly_calibrated_resistances_df,
         resistance_column_title='newly_calibrated_resistance')
 
-    # # Turn all data into a log base 10 scale
-    # avg_resistance_cal_df['Average_Resistance'] = np.log10(avg_resistance_cal_df['Average_Resistance'])
-    # newly_calibrated_resistances_df['Average_Resistance'] = np.log10(newly_calibrated_resistances_df['Average_Resistance'])
-    # newly_calibrated_resistances_df['newly_calibrated_resistance'] = np.log10(newly_calibrated_resistances_df['newly_calibrated_resistance'])
-    #
-    # avg_resistance_cal_df['Calculated Temp (K)'] = np.log10(avg_resistance_cal_df['Calculated Temp (K)'])
-    # newly_calibrated_resistances_df['Newly Calculated Temp (K)'] = np.log10(newly_calibrated_resistances_df['Newly Calculated Temp (K)'])
-
     # Calculate uncertainties for the newly calibrated data
     newly_calibrated_resistances_df = calculate_uncal_uncertainties_temp(
         df_cal=avg_resistance_cal_df,
@@ -212,116 +199,5 @@ if __name__ == '__main__':
         pauls_calibration_path=calibration_curve_paul_path)
 
     exporting_calibration_curve(avg_uncal_data=newly_calibrated_resistances_df)
-
-
-    # """
-    # Repeating with unfiltered data below:
-    # df_unfiltered_cal=sensor_name_dfs["(U10391- Calibrated)"]
-    # df_filtered_uncal=sensor_name_dfs["(U10626- UnCal)"]
-    #
-    # ["Resistance"]
-    # ["Calculated Temp (K)"]
-    #
-    # df_unfiltered_cal
-    # df_filtered_uncal
-    #
-    # """
-    # df_unfiltered_cal=sensor_name_dfs["(U10391 - Calibrated)"]
-    # df_unfiltered_uncal=sensor_name_dfs["(U10626 - UnCal)"]
-    #
-    # ### Re named here for the of ploting unfiltered data
-    #
-    # avg_resistance_cal_df = df_unfiltered_cal
-    # avg_resistance_uncal_df = df_unfiltered_uncal
-    #
-    # avg_resistance_cal_df['Average_Resistance'] = avg_resistance_cal_df['Resistance']
-    # avg_resistance_uncal_df['Average_Resistance'] = avg_resistance_uncal_df['Resistance']
-    #
-    #
-    # plot_calibration_curve(avg_cal_data=avg_resistance_cal_df,
-    #                        avg_uncal_data=avg_resistance_uncal_df,
-    #                        xlabel='Calculated Temp (K)',
-    #                        ylabel='Resistance',
-    #                        title='Calibration Curve, Calibrated and Uncalibrated, unfiltered')
-    #
-    # # Fit the polynomial model and plot the fitted curve
-    # popt = fit_and_plot_polynomial(avg_resistance_cal_df, avg_resistance_uncal_df,
-    #                                calibrated_label='Average_Resistance', uncalibrated_label='Average_Resistance')
-    #
-    # # Apply the calibration to get calibrated resistance values
-    # newly_calibrated_resistances_df = apply_calibration(avg_resistance_uncal_df,
-    #                                                     uncalibrated_label='Average_Resistance', popt=popt)
-    #
-    # # After the fit, calculate the residuals and std deviation
-    # avg_resistance_cal_df['residuals'] = avg_resistance_cal_df['fitted_resistance'] - avg_resistance_cal_df[
-    #     'Average_Resistance']
-    # std_dev_residuals = avg_resistance_cal_df['residuals'].std()
-    #
-    # # Plot the calibration results to show the effectiveness
-    # plot_calibration_results(avg_resistance_cal_df, newly_calibrated_resistances_df,
-    #                         calibrated_label='Average_Resistance',
-    #                          uncalibrated_label='Average_Resistance',
-    #                          calibrated_res_label='newly_calibrated_resistance',
-    #                          x_label='Uncalibrated Sensor Resistance (Ω)',
-    #                          y_label='Calibrated Sensor Resistance (Ω)',
-    #                          title='Comparison of Original and Calibrated Values, unfiltered')
-    #
-    # # Plot the alt calibration results to show the effectiveness
-    # alt_plot_calibration_results(avg_resistance_cal_df, newly_calibrated_resistances_df,
-    #                         calibrated_label='Average_Resistance',
-    #                          uncalibrated_label='Average_Resistance',
-    #                          calibrated_res_label='newly_calibrated_resistance',
-    #                          x_label='Originally Uncalibrated Sensor Resistance (Ω)',
-    #                          y_label='Calibrated Resistance (Ω)',
-    #                          title='Alternative Comparison of Original Scatter Plot and Newly Calibrated Values, unfiltered')
-    #
-    # newly_calibrated_resistances_df = calculate_temp_via_chebychev(
-    #     ROx_coeff_file_path, newly_calibrated_resistances_df,
-    #     resistance_column_title='newly_calibrated_resistance, unfiltered')
-    #
-    # # Calculate uncertainties for the newly calibrated data
-    # newly_calibrated_resistances_df = calculate_uncal_uncertainties_temp(
-    #     df_cal=avg_resistance_cal_df,
-    #     df_uncal=newly_calibrated_resistances_df,
-    #     popt=popt,
-    #     std_dev_residuals=std_dev_residuals
-    # )
-    #
-    # avg_resistance_cal_df = calculate_cal_uncertainties_temp(
-    #     df_cal=avg_resistance_cal_df,
-    #     df_uncal=newly_calibrated_resistances_df,
-    #     popt=popt,
-    #     std_dev_residuals=std_dev_residuals
-    # )
-    #
-    # newly_calibrated_resistances_df = calculate_uncal_uncertainties_resistance(
-    #     df_cal=avg_resistance_cal_df,
-    #     df_uncal=newly_calibrated_resistances_df,
-    #     popt=popt,
-    #     std_dev_residuals=std_dev_residuals
-    # )
-    #
-    # avg_resistance_cal_df = calculate_cal_uncertainties_resistance(
-    #     df_cal=avg_resistance_cal_df,
-    #     df_uncal=newly_calibrated_resistances_df,
-    #     popt=popt,
-    #     std_dev_residuals=std_dev_residuals
-    # )
-    #
-    # alt_alt_plot_calibration_curve_with_uncertainty(
-    #     avg_cal_data=avg_resistance_cal_df,
-    #     avg_uncal_data=newly_calibrated_resistances_df,
-    #     xlabel='Calculated Temp (K)',
-    #     ylabel='Resistance',
-    #     title='Calibration Curve, with newly calibrated resistance and uncertainties, unfiltered',
-    #     pauls_calibration_path=calibration_curve_paul_path)
-    #
-    # alt_alt_log_log_plot_calibration_curve_with_uncertainty(
-    #     avg_cal_data=avg_resistance_cal_df,
-    #     avg_uncal_data=newly_calibrated_resistances_df,
-    #     xlabel='Calculated Temp (K)',
-    #     ylabel='Resistance',
-    #     title='Calibration Curve, with newly calibrated resistance and uncertainties (log log plot), unfiltered',
-    #     pauls_calibration_path=calibration_curve_paul_path)
 
     print('fin')

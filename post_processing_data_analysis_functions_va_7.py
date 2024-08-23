@@ -303,22 +303,6 @@ def filter_data_by_ranges(df, ranges_df, timestamp_column):
     filtered_data = pd.concat([filter_by_range(df, row['Start_Timestamp'], row['End_Timestamp'], timestamp_column) for _, row in ranges_df.iterrows()])
     return filtered_data
 
-
-# def filter_and_calculate_averages(df, ranges_df, timestamp_column):
-#     # Filter the uncalibrated dataframe based on the timestamp ranges and calculate average resistance.
-#
-#     results = []
-#     for _, row in ranges_df.iterrows():
-#         filtered_data = filter_by_range(df, row['Start_Timestamp'], row['End_Timestamp'], timestamp_column)
-#         average_resistance = calculate_average_resistance(filtered_data)
-#         results.append({
-#             'Setpoint': row['Setpoint'],
-#             'Start_Timestamp': row['Start_Timestamp'],
-#             'End_Timestamp': row['End_Timestamp'],
-#             'Average_Resistance': average_resistance
-#         })
-#     return pd.DataFrame(results), filtered_data
-
 def filter_and_calculate_averages(df, ranges_df, timestamp_column):
     # Filter the uncalibrated dataframe based on the timestamp ranges and calculate average resistance.
 
@@ -772,9 +756,6 @@ def fit_and_plot_polynomial(df_cal, df_uncal, calibrated_label, uncalibrated_lab
                             x_label='Uncalibrated Sensor Resistance (Ω)',
                             y_label='Calibrated Sensor Resistance (Ω)',
                             title='Calibration Curve'):
-    # Exclude any NaNs from the data
-    # df_cal = df_cal.dropna(subset=[calibrated_label])
-    # df_uncal = df_uncal.dropna(subset=[uncalibrated_label])
 
     # Fit the polynomial model to the data
     popt, _ = curve_fit(polynomial, df_uncal[uncalibrated_label], df_cal[calibrated_label])
@@ -801,50 +782,6 @@ def fit_and_plot_polynomial(df_cal, df_uncal, calibrated_label, uncalibrated_lab
 
     # Return the fitted model parameters
     return popt
-
-### aligning version currently not working
-# def fit_and_plot_polynomial(df_cal, df_uncal, calibrated_label, uncalibrated_label,
-#                             x_label='Uncalibrated Sensor Resistance (Ω)',
-#                             y_label='Calibrated Sensor Resistance (Ω)',
-#                             title='Calibration Curve'):
-#     # Align the DataFrames on a common key (e.g., index or a specific column)
-#     aligned_data = pd.merge(
-#         df_uncal[[uncalibrated_label]],
-#         df_cal[[calibrated_label]],
-#         left_index=True,  # Assuming the index is the common key
-#         right_index=True,
-#         how='inner'  # Keep only rows that exist in both DataFrames
-#     )
-#
-#     # Extract aligned columns
-#     aligned_uncal = aligned_data[uncalibrated_label]
-#     aligned_cal = aligned_data[calibrated_label]
-#
-#     # Fit the polynomial model to the aligned data
-#     popt, _ = curve_fit(polynomial, aligned_uncal, aligned_cal)
-#
-#     # Generate fitted resistance values for plotting
-#     aligned_data['fitted_resistance'] = polynomial(aligned_uncal, *popt)
-#
-#     # Plot the original data points and the fitted curve
-#     fig, ax = plt.subplots(figsize=(10, 6))
-#     ax.scatter(aligned_uncal, aligned_cal, color='dodgerblue', label='Data Points', marker='.', s=10)
-#     ax.plot(aligned_uncal, aligned_data['fitted_resistance'], color='red', label='Fitted Curve', linewidth=1)
-#     ax.set_xlabel(x_label, fontsize=12)
-#     ax.set_ylabel(y_label, fontsize=12, labelpad=20)
-#     ax.set_title(title, fontsize=14)
-#     ax.legend()
-#     ax.grid(True, linestyle='-', alpha=0.5)
-#     fig.subplots_adjust(left=0.15)
-#     plt.savefig(f"plots\\{title}.png", dpi=1200)
-#
-#     plt.show()
-#
-#     # Print the fitted equation
-#     print(f"Calibration Curve: R_cal = {popt[0]}*R_uncal^2 + {popt[1]}*R_uncal + {popt[2]}")
-#
-#     # Return the fitted model parameters
-#     return popt
 
 def apply_calibration(df_uncal, uncalibrated_label, popt):
 
@@ -980,53 +917,6 @@ def alt_alt_log_log_plot_calibration_curve_with_uncertainty(avg_cal_data, avg_un
     # Save and show the plot
     plt.savefig(f"plots\\{title}.png", dpi=1200)
     plt.show()
-
-# def alt_alt_new_log_log_plot_calibration_curve_with_uncertainty(avg_cal_data, avg_uncal_data, xlabel, ylabel, title, pauls_calibration_path):
-#     fig, ax = plt.subplots(figsize=(10, 6))
-#
-#     # Set x-axis and y-axis to log scale
-#     ax.set_xscale('log')
-#     ax.set_yscale('log')
-#
-#
-#     # Plot the calibrated data
-#     ax.errorbar(avg_cal_data['Calculated Temp (K)'], avg_cal_data['Average_Resistance'],
-#                 xerr=avg_cal_data['total_uncertainty_temp'], yerr=avg_cal_data['total_uncertainty_resistance'],
-#                 fmt='.', linestyle='-', capsize=1, label='Average Calibrated Data', color='red', ecolor='green', markersize='0.5')
-#
-#     # Plot the newly calibrated data with uncertainties
-#     ax.errorbar(avg_uncal_data['Newly Calculated Temp (K)'], avg_uncal_data['Average_Resistance'],
-#                 xerr=avg_uncal_data['total_uncertainty_temp'], yerr=avg_uncal_data['total_uncertainty_resistance'],
-#                 fmt='.', linestyle='-', capsize=1, label='Average Newly Calibrated Data', color='dodgerblue', ecolor='purple', markersize='0.5')
-#
-#     # Plot the comparison data from Paul's calibration
-#     pauls_calibration_df = pd.read_csv(pauls_calibration_path, sep='\t')
-#
-#     # pauls_calibration_df['Resistance'] = np.log10(pauls_calibration_df['Resistance'])
-#     # pauls_calibration_df['Kelvin'] = np.log10(pauls_calibration_df['Kelvin'])
-#
-#     ax.plot(pauls_calibration_df['Kelvin'], pauls_calibration_df['Resistance'],
-#             label='Paul\'s Calibration Curve Comparison', color='green', marker='x', linestyle='--', markersize='2')
-#
-#     # Labels, title, and grid
-#     ax.set_xlabel(xlabel, fontsize=12)
-#     ax.set_ylabel(ylabel, fontsize=12, labelpad=20)
-#     ax.set_title(title, fontsize=14)
-#     ax.grid(True, linestyle='-', alpha=0.5)
-#
-#     # Legend
-#     legend = ax.legend(handler_map={plt.Line2D: HandlerLine2D(numpoints=1)})
-#     for handle in legend.legendHandles:
-#         handle.set_rasterized(10)
-#
-#     # Layout adjustments
-#     plt.tight_layout()
-#     fig.subplots_adjust(left=0.15)
-#
-#     # Save and show the plot
-#     plt.savefig(f"plots\\{title}.png", dpi=1200)
-#     plt.show()
-
 
 def alt_alt_new_log_log_plot_calibration_curve_with_uncertainty(avg_cal_data, avg_uncal_data, xlabel, ylabel, title,
                                                                 pauls_calibration_path):
@@ -1177,7 +1067,6 @@ def calculate_cal_uncertainties_temp(df_cal, df_uncal, popt, std_dev_residuals):
 
     return df_cal
 
-
 def calculate_uncal_uncertainties_resistance(df_cal, df_uncal, popt, std_dev_residuals):
     # Uncertainty from the calibrated sensor (assume constant or vary with temperature as needed)
     df_uncal['uncertainty_cal_sensor'] = df_uncal['Newly Calculated Temp (K)'].apply(
@@ -1189,6 +1078,7 @@ def calculate_uncal_uncertainties_resistance(df_cal, df_uncal, popt, std_dev_res
 
     # Calculate standard deviation of resistance values
     resistance_std = df_uncal['Average_Resistance'].std()
+
     # Calculate uncertainty mean based on the number of measurements
     df_uncal['uncertainty_mean'] = resistance_std / np.sqrt(df_uncal['Resistance_Count'])
 
